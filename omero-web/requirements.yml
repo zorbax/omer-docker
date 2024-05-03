@@ -1,0 +1,6 @@
+# External Ansible roles required by this repository
+- src: ome.java
+  version: 2.2.0
+
+- name: ome.omero_web
+  version: 5.0.0
