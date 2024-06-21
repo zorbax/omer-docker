@@ -1,0 +1,13 @@
+---
+
+- name: ome.omero_server
+  version: 6.1.0
+
+- name: ome.omero_web
+  version: 5.1.1
+
+- name: ome.postgresql
+  version: 5.4.0
+
+- name: ome.postgresql_client
+  version: 0.4.3

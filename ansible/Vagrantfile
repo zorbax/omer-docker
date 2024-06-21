@@ -1,0 +1,71 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  boxes = [
+    {
+      :name => "ansible-host",
+      :box => "debian/bookworm64",
+      :ram => 8048,
+      :vcpu => 1,
+      :ip => "192.168.56.1"
+    },
+    {
+      :name => "omero-database",
+      :box => "rockylinux/9",
+      :ram => 1024,
+      :vcpu => 1,
+      :ip => "192.168.56.2"
+    },
+    {
+      :name => "omero-web",
+      :box => "rockylinux/9",
+      :ram => 1024,
+      :vcpu => 1,
+      :ip => "192.168.56.3"
+    },
+    {
+      :name => "omero-server",
+      :box => "rockylinux/9",
+      :ram => 1024,
+      :vcpu => 1,
+      :ip => "192.168.56.4"
+    }
+  ]
+
+  # Provision each of the VMs.
+  boxes.each do |opts|
+    config.vm.provision :shell, inline: <<-SHELL
+      echo "#{opts[:ip]} #{opts[:name]}" >> /etc/hosts
+    SHELL
+    config.vm.define opts[:name] do |config|
+      # Proxy server
+      # config.proxy.http     = "http://usernam:password@x.y:80"
+      # config.proxy.https    = "http://usernam:password@x.y:80"
+      # config.proxy.no_proxy = "localhost,127.0.0.1"
+      config.vm.synced_folder "./omero", "/home/vagrant/omero", id: "vagrant-root", disabled: false
+      config.ssh.insert_key = false
+
+      config.vm.box = opts[:box]
+      config.vm.hostname = opts[:name]
+      config.vm.provider :virtualbox do |v|
+        v.memory = opts[:ram]
+        v.cpus = opts[:vcpu]
+      end
+      config.vm.network :private_network, ip: opts[:ip]
+      config.vm.provision :file do |file|
+        file.source = './config/keys/vagrant'
+        file.destination = '/tmp/vagrant'
+      end
+      config.vm.provision :file do |file|
+        file.source = './config/inventory-test.yaml'
+        file.destination = '/home/vagrant/inventory-test.yaml'
+      end
+      config.vm.provision :ansible do |ansible|
+        ansible.verbose = "vv"
+        ansible.compatibility_mode = "2.0"
+        ansible.playbook = "playbook.yml"
+      end
+   end
+  end
+end
