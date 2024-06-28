@@ -3,7 +3,7 @@ FROM debian:bookworm-slim
 LABEL maintainer="@zorbax"
 
 ENV PG_MAJOR=14 \
-    PG_VERSION=14.11-1.pgdg120+2 \
+    PG_VERSION=14.12-1.pgdg120+1 \
     DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -qq \
