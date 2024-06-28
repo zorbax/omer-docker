@@ -1,0 +1,36 @@
+- hosts: all
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  become: yes
+  become_user: root
+  gather_facts: true
+
+  tasks:
+    - block:
+        - name: Ansible installation
+          apt:
+            name:
+              - locales
+              - ansible
+              - vim
+            state: present
+            update_cache: yes
+        - name: Set system locale
+          lineinfile:
+            path: /etc/default/locale
+            line: 'LC_ALL=C.UTF-8'
+            create: true
+      when: (ansible_facts['os_family'] == 'Debian') and ('ansible-host' in inventory_hostname)
+
+    - block:
+        - name: Ansible installation
+          yum:
+            name: epel-release
+            state: present
+        - name: Timezone configuration
+          command: timedatectl set-timezone Europe/Stockholm
+        - name: Ansible installation
+          yum:
+            name: ansible
+            state: present
+      when: ansible_facts['os_family'] == 'RedHat'
