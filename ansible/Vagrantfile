@@ -6,7 +6,7 @@ Vagrant.configure("2") do |config|
     {
       :name => "ansible-host",
       :box => "debian/bookworm64",
-      :ram => 8048,
+      :ram => 4096,
       :vcpu => 1,
       :ip => "192.168.56.2"
     },
@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
     {
       :name => "omero-server",
       :box => "rockylinux/9",
-      :ram => 1024,
+      :ram => 2048,
       :vcpu => 1,
       :ip => "192.168.56.5"
     }
@@ -67,10 +67,10 @@ Vagrant.configure("2") do |config|
         file.source = './config/vagrant.key.rsa'
         file.destination = '/tmp/vagrant'
       end
-      config.vm.provision :file do |file|
-        file.source = './config/inventory.yaml'
-        file.destination = '/home/vagrant/omero/inventory.yaml'
-      end
+      # config.vm.provision :file do |file|
+      #   file.source = './config/inventory.yaml'
+      #   file.destination = '/home/vagrant/omero/inventory.yaml'
+      # end
       config.vm.provision :file do |file|
         file.source = './config/ansible.cfg'
         file.destination = '/home/vagrant/.ansible.cfg'
@@ -78,7 +78,7 @@ Vagrant.configure("2") do |config|
       config.vm.provision :ansible do |ansible|
         ansible.verbose = "vv"
         ansible.compatibility_mode = "2.0"
-        ansible.playbook = "./config/playbook.yml"
+        ansible.playbook = "./config/playbook.yaml"
       end
    end
   end

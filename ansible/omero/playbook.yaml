@@ -4,32 +4,39 @@
   tasks:
     - name: "{{ inventory_hostname }}"
       include_role:
-        name: "{{ item }}"
+        name: ome.omero_server
       when: inventory_hostname == "omero-server"
       vars:
-        roles:
-          - ome.omero_server
-        omero_server_dbhost: postgresql
-        omero_server_dbname: omero
-        omero_server_dbuser: omero
-        omero_server_dbpass: omero
+        ansible_become: true
+        become_user: omero-server
+        omero_server_dbhost:  postgresql
         postgresql_version: "14"
-      loop: "{{ roles }}"
+      timeout: 300
+    - name: "{{ inventory_hostname }}"
+      include_role:
+        name: ome.postgresql
+      when: inventory_hostname == "postgresql"
+      vars:
+        postgresql_version: "14"
+        postgresql_server_listen: "'*'"
+        postgresql_server_auth:
+          - database: omero
+            user: omero
+            address: 0.0.0.0/0
+        postgresql_databases:
+          - name: omero
+        postgresql_users:
+          - user: omero
+            password: omero
+            databases: [omero]
     - name: "{{ inventory_hostname }}"
       include_role:
         name: "{{ item }}"
       when: inventory_hostname == "omero-web"
       vars:
         roles:
+          - ome.basedeps
           - ome.omero_web
-      loop: "{{ roles }}"
-    - name: "{{ inventory_hostname }}"
-      include_role:
-        name: "{{ item }}"
-      when: inventory_hostname == "postgresql"
-      vars:
-        roles:
-          - ome.postgresql
-        postgresql_version: "14"
-      loop: "{{ roles }}"
-    
+        omero_web_config_set:
+          - omero.web.server_list: ['omero-server']
+      loop: "{{ roles }}" 
